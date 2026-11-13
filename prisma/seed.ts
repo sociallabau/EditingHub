@@ -134,13 +134,6 @@ async function main() {
       },
     });
     console.log(`Created admin ${email}`);
-  } else if (process.env.SEED_ADMIN_RESET === "1" && process.env.SEED_ADMIN_PASSWORD) {
-    // one-off recovery: set SEED_ADMIN_RESET=1, deploy, then remove it
-    await db.user.update({
-      where: { email },
-      data: { passwordHash: await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD, 10), active: true, role: "ADMIN" },
-    });
-    console.log(`Reset password for ${email}`);
   }
 }
 
