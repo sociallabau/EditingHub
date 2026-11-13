@@ -51,7 +51,7 @@ export function TemplateEditor({ template, canEdit }: { template: T; canEdit: bo
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-2 border-b border-line px-4 py-2.5 text-sm">
+      <header className="flex items-center gap-2 border-b border-line px-5 py-3 text-sm">
         <Link href="/templates" className="text-muted hover:text-zinc-100">
           Templates
         </Link>
@@ -84,7 +84,7 @@ export function TemplateEditor({ template, canEdit }: { template: T; canEdit: bo
         <div className="mx-auto max-w-3xl space-y-8 p-6">
           <div className="grid gap-3 sm:grid-cols-[auto_1fr]">
             <input type="color" value={t.color} onChange={(e) => set({ color: e.target.value })} className="h-9 w-9 cursor-pointer rounded border border-line bg-transparent" />
-            <input value={t.name} onChange={(e) => set({ name: e.target.value })} className="bg-transparent text-2xl font-semibold outline-none" />
+            <input value={t.name} onChange={(e) => set({ name: e.target.value })} className="bg-transparent font-heading text-[28px] font-medium tracking-tight outline-none" />
             <div className="sm:col-span-2">
               <label className="label">Description</label>
               <input className="input" value={t.description} onChange={(e) => set({ description: e.target.value })} placeholder="When should people use this template?" />

@@ -23,8 +23,8 @@ export function NotificationList({ items, filter }: { items: Item[]; filter: "al
   const [, start] = useTransition();
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between border-b border-line px-4 py-2.5">
-        <h1 className="text-sm font-semibold">Notifications</h1>
+      <header className="flex items-center justify-between border-b border-line px-5 py-3">
+        <h1 className="page-title">Notifications</h1>
         <button className="btn-ghost" onClick={() => start(() => markAllNotificationsRead())}>
           <CheckCheck className="h-3.5 w-3.5" /> Mark all read
         </button>

@@ -28,7 +28,6 @@ export async function POST(request: Request) {
           tokenPayload: JSON.stringify({ userId: user.id }),
         };
       },
-      onUploadCompleted: async () => {},
     });
     return NextResponse.json(json);
   } catch (error) {

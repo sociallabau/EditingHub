@@ -51,7 +51,7 @@ model User {
   email        String   @unique
   passwordHash String
   role         Role     @default(EDITOR)
-  color        String   @default("#6366f1")
+  color        String   @default("#977c58")
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
 
@@ -68,7 +68,7 @@ model User {
 model Client {
   id        String    @id @default(cuid())
   name      String    @unique
-  color     String    @default("#f2542d")
+  color     String    @default("#977c58")
   notes     String    @default("")
   createdAt DateTime  @default(now())
   projects  Project[]
@@ -88,7 +88,7 @@ model Template {
   id              String    @id @default(cuid())
   name            String
   description     String    @default("")
-  color           String    @default("#22c55e")
+  color           String    @default("#977c58")
   defaultPriority Priority  @default(MEDIUM)
   /// [{ key, title, hint }] — footage / asset sections (e.g. "Suburb B-roll")
   sections        Json      @default("[]")
@@ -129,6 +129,7 @@ model Project {
   comments      Comment[]
   activities    Activity[]
   notifications Notification[]
+  transcripts   Transcript[]
 
   @@index([archived, stageId])
 }
@@ -186,6 +187,26 @@ model Video {
   uploadedBy   User        @relation(fields: [uploadedById], references: [id])
   comments     Comment[]
   notifications Notification[]
+  transcript   Transcript?
+  /// AI caption/typo check results: [{ time, type, seen, issue, suggestion }]
+  aiQa         Json?
+  aiQaAt       DateTime?
+}
+
+/// Speech transcript of an edit (videoId set) or a raw clip used for AI briefs.
+model Transcript {
+  id         String   @id @default(cuid())
+  kind       String   @default("EDIT") // EDIT | RAW
+  sourceName String
+  duration   Float?
+  text       String
+  /// [{ start, end, text }]
+  segments   Json     @default("[]")
+  createdAt  DateTime @default(now())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  videoId    String?  @unique
+  video      Video?   @relation(fields: [videoId], references: [id], onDelete: Cascade)
 }
 
 model Comment {
@@ -193,6 +214,8 @@ model Comment {
   body      String
   timestamp Float?
   resolved  Boolean   @default(false)
+  /// Frame annotation: [{ color, points: [[x,y],...] }] in 0–1 video coordinates
+  drawing   Json?
   createdAt DateTime  @default(now())
   projectId String
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)

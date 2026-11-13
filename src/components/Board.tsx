@@ -200,8 +200,8 @@ export function Board({ projects, meta, me }: { projects: BoardProject[]; meta: 
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between border-b border-line px-4 py-2.5">
-        <h1 className="text-sm font-semibold">Projects</h1>
+      <header className="flex items-center justify-between border-b border-line px-5 py-3">
+        <h1 className="page-title">Projects</h1>
         <button className="btn-primary" onClick={() => setNewIn(meta.stages[0]?.id ?? null)}>
           <Plus className="h-3.5 w-3.5" /> New
         </button>
@@ -386,7 +386,7 @@ export function Board({ projects, meta, me }: { projects: BoardProject[]; meta: 
         </div>
         <DragOverlay>
           {active ? (
-            <div className="w-[264px] rotate-2 opacity-90">
+            <div className="w-[264px] rotate-2 opacity-95 shadow-2xl">
               <CardBody project={active} />
             </div>
           ) : null}
@@ -463,7 +463,7 @@ function Column({
       <div
         ref={setNodeRef}
         className={cn(
-          "flex min-h-[120px] flex-1 flex-col gap-2 overflow-y-auto rounded-lg border border-transparent bg-panel/60 p-1.5",
+          "flex min-h-[120px] flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-transparent bg-panel/70 p-2",
           isOver && "border-line bg-panel",
         )}
       >
@@ -506,7 +506,7 @@ function CardBody({ project: p }: { project: BoardProject }) {
   return (
     <div
       className={cn(
-        "group rounded-lg border border-line bg-card p-2 text-left shadow-sm transition-colors hover:border-zinc-600",
+        "group lux-card p-2.5 text-left hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_8px_20px_var(--eh-shadow)]",
         p.priority === "URGENT" && "border-l-2 border-l-red-500",
       )}
     >

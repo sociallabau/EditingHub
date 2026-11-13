@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTransition } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { MoreHorizontal, MessageSquare, Trash2, Film } from "lucide-react";
+import { MoreHorizontal, MessageSquare, Trash2, Film, Columns2 } from "lucide-react";
 import { deleteVideo } from "@/lib/actions";
 import { Menu, MenuItem } from "../ui";
 import { STATUS_ICON } from "./ProjectNav";
@@ -29,6 +29,12 @@ export function VideoGrid({ projectId, videos }: { projectId: string; videos: Gr
   const [, start] = useTransition();
   if (!videos.length) return <p className="text-xs text-muted">No edits uploaded yet.</p>;
   return (
+    <>
+    {videos.length > 1 && (
+      <Link href={`/projects/${projectId}/compare`} className="btn mb-3">
+        <Columns2 className="h-3.5 w-3.5" /> Compare versions side by side
+      </Link>
+    )}
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
       {videos.map((v) => (
         <div key={v.id} className="overflow-hidden rounded-lg border border-line bg-card">
@@ -43,10 +49,10 @@ export function VideoGrid({ projectId, videos }: { projectId: string; videos: Gr
             ) : (
               <Film className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-zinc-600" />
             )}
-            <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px]">
+            <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] text-white">
               {STATUS_ICON[v.status]} {STATUS_LABEL[v.status]}
             </span>
-            <span className="absolute left-2 top-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-semibold">v{v.version}</span>
+            <span className="absolute left-2 top-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] text-white font-semibold">v{v.version}</span>
           </Link>
           <div className="flex items-start gap-2 p-2.5">
             <div className="min-w-0 flex-1">
@@ -85,5 +91,6 @@ export function VideoGrid({ projectId, videos }: { projectId: string; videos: Gr
         </div>
       ))}
     </div>
+    </>
   );
 }

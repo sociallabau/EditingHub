@@ -63,7 +63,7 @@ export function PageEditor({ page }: { page: { id: string; title: string; conten
         <input
           value={title}
           onChange={(e) => (setTitle(e.target.value), queue())}
-          className="min-w-0 flex-1 bg-transparent text-2xl font-semibold outline-none"
+          className="min-w-0 flex-1 bg-transparent font-heading text-[28px] font-medium tracking-tight outline-none"
           placeholder="Untitled"
         />
         <button className="btn" onClick={() => (editing && status !== "saved" && save(), setEditing((e) => !e))}>

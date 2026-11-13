@@ -8,7 +8,7 @@ import { createClient } from "@/lib/actions";
 export function NewClient() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [color, setColor] = useState("#f2542d");
+  const [color, setColor] = useState("#977c58");
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
   return (

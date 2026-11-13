@@ -28,7 +28,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   if (!client) notFound();
   return (
     <div className="h-full overflow-y-auto">
-      <header className="flex items-center gap-2 border-b border-line px-4 py-2.5 text-sm">
+      <header className="flex items-center gap-2 border-b border-line px-5 py-3 text-sm">
         <Link href="/clients" className="text-muted hover:text-zinc-100">
           Clients
         </Link>

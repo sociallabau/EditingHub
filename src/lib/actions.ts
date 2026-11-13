@@ -72,7 +72,7 @@ export async function changePassword(_: unknown, form: FormData) {
 
 /* ───────────────────────── team ───────────────────────── */
 
-const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ec4899", "#06b6d4", "#ef4444", "#a855f7", "#84cc16"];
+const COLORS = ["#977c58", "#7b6a9c", "#5f8a6a", "#b8687e", "#4f8391", "#c4674f", "#c99a3c", "#6b7a4a"];
 
 export async function createUser(_: unknown, form: FormData) {
   await assertAdmin();
@@ -478,9 +478,10 @@ export async function addComment(input: {
   parentId?: string | null;
   body: string;
   timestamp?: number | null;
+  drawing?: { color: string; points: [number, number][] }[] | null;
 }) {
   const user = await requireUser();
-  const body = input.body.trim();
+  const body = input.body.trim() || (input.drawing?.length ? "See drawing" : "");
   if (!body) return;
   const comment = await db.comment.create({
     data: {
@@ -489,6 +490,7 @@ export async function addComment(input: {
       videoId: input.videoId || null,
       parentId: input.parentId || null,
       timestamp: input.timestamp ?? null,
+      drawing: input.drawing?.length ? (input.drawing as Prisma.InputJsonValue) : undefined,
       authorId: user.id,
     },
     include: { project: true, video: true },
@@ -644,5 +646,47 @@ export async function deleteStage(id: string) {
   const count = await db.project.count({ where: { stageId: id } });
   if (count > 0) throw new Error("Move or archive the projects in this column first (including archived ones)");
   await db.stage.delete({ where: { id } });
+  refresh();
+}
+
+/* ───────────────────────── transcripts & AI checks ───────────────────────── */
+
+export async function saveTranscript(input: {
+  projectId: string;
+  videoId?: string | null;
+  sourceName: string;
+  duration?: number | null;
+  text: string;
+  segments: { start: number; end: number; text: string }[];
+}) {
+  await requireUser();
+  const data = {
+    projectId: input.projectId,
+    sourceName: input.sourceName,
+    duration: input.duration ?? null,
+    text: input.text,
+    segments: input.segments as Prisma.InputJsonValue,
+  };
+  if (input.videoId) {
+    await db.transcript.upsert({
+      where: { videoId: input.videoId },
+      create: { ...data, videoId: input.videoId, kind: "EDIT" },
+      update: data,
+    });
+  } else {
+    await db.transcript.create({ data: { ...data, kind: "RAW" } });
+  }
+  refresh();
+}
+
+export async function deleteTranscript(id: string) {
+  await requireUser();
+  await db.transcript.delete({ where: { id } });
+  refresh();
+}
+
+export async function saveVideoQa(videoId: string, issues: { time: number; seen: string; issue: string; suggestion: string }[]) {
+  await requireUser();
+  await db.video.update({ where: { id: videoId }, data: { aiQa: issues as Prisma.InputJsonValue, aiQaAt: new Date() } });
   refresh();
 }

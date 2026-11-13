@@ -13,6 +13,7 @@ import { VideoGrid } from "@/components/project/VideoGrid";
 import { VideoUpload } from "@/components/project/VideoUpload";
 import { ProjectChat } from "@/components/project/ProjectChat";
 import { AddSection } from "@/components/project/AddSection";
+import { AiBrief } from "@/components/project/AiBrief";
 import { Avatar } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -83,6 +84,18 @@ export default async function ProjectPage({
       <div className="mx-auto max-w-3xl px-6 py-8">
         <div className="mb-1 text-xs text-muted">{p.title}</div>
         <PageEditor key={page.id} page={{ id: page.id, title: page.title, content: page.content, updatedAt: page.updatedAt.toISOString() }} />
+      </div>
+    );
+  } else if (tab === "ai-brief") {
+    const clips = await db.transcript.findMany({ where: { projectId: id, kind: "RAW" }, orderBy: { createdAt: "asc" } });
+    main = (
+      <div className="mx-auto max-w-3xl px-6 py-8">
+        <div className="mb-1 text-xs text-muted">{p.title}</div>
+        <AiBrief
+          projectId={p.id}
+          hasBrief={p.pages.some((pg) => pg.title === "AI Brief")}
+          clips={clips.map((c) => ({ id: c.id, sourceName: c.sourceName, duration: c.duration, words: c.text.split(/\s+/).filter(Boolean).length }))}
+        />
       </div>
     );
   } else if (tab === "videos") {

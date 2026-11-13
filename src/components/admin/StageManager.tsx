@@ -27,8 +27,8 @@ export function StageManager({ stages }: { stages: S[] }) {
   };
   return (
     <div className="h-full overflow-y-auto">
-      <header className="border-b border-line px-4 py-2.5">
-        <h1 className="text-sm font-semibold">Board columns</h1>
+      <header className="border-b border-line px-5 py-3">
+        <h1 className="page-title">Board columns</h1>
       </header>
       <div className="mx-auto max-w-3xl space-y-4 p-6">
         <p className="text-xs text-muted">

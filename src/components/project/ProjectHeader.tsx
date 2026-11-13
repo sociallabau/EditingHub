@@ -62,7 +62,7 @@ export function ProjectHeader({
         onChange={(e) => setTitle(e.target.value)}
         onBlur={() => title.trim() && title !== p.title && start(() => updateProject(p.id, { title }))}
         onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-        className="w-full bg-transparent text-2xl font-semibold text-zinc-50 outline-none"
+        className="w-full bg-transparent font-heading text-[28px] font-medium tracking-tight text-zinc-50 outline-none"
       />
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">

@@ -44,8 +44,8 @@ export function ArchivedList({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between border-b border-line px-4 py-2.5">
-        <h1 className="text-sm font-semibold">Archived projects</h1>
+      <header className="flex items-center justify-between border-b border-line px-5 py-3">
+        <h1 className="page-title">Archived projects</h1>
         <div className="relative">
           <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search archive..." className="input w-56 py-1 pl-7 text-xs" />

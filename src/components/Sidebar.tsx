@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, FolderKanban, Archive, Building2, LayoutTemplate, Users, Columns3, LogOut, KeyRound } from "lucide-react";
+import { Bell, Moon, Sun, FolderKanban, Archive, Building2, LayoutTemplate, Users, Columns3, LogOut, KeyRound } from "lucide-react";
 import { logout } from "@/lib/actions";
 import { cn, ROLE_LABEL } from "@/lib/utils";
 import { Avatar, Menu, MenuItem } from "./ui";
+import { useColorMode } from "@/app/providers";
 
 export function Sidebar({
   user,
@@ -17,6 +18,7 @@ export function Sidebar({
 }) {
   const path = usePathname();
   const router = useRouter();
+  const { mode, setMode } = useColorMode();
   const [unread, setUnread] = useState(initialUnread);
   const last = useRef(initialUnread);
   useEffect(() => setUnread(initialUnread), [initialUnread]);
@@ -52,12 +54,12 @@ export function Sidebar({
     exact ? path === href || (path.startsWith("/projects/") && !path.startsWith("/projects/archived")) : path.startsWith(href);
 
   return (
-    <aside className="flex w-[52px] shrink-0 flex-col border-r border-line bg-panel md:w-[200px]">
-      <div className="flex items-center gap-2 px-3 py-3">
+    <aside className="scheme-dark flex w-[52px] shrink-0 flex-col bg-panel md:w-[208px]">
+      <div className="flex items-center gap-2.5 px-3.5 py-4">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent">
           <svg viewBox="0 0 32 32" className="h-4 w-4"><path d="M12 9l11 7-11 7z" fill="#fff" /></svg>
         </div>
-        <span className="hidden text-sm font-semibold md:inline">Editing Hub</span>
+        <span className="hidden font-heading text-[17px] font-medium tracking-tight md:inline">Editing Hub</span>
       </div>
       <nav className="flex-1 space-y-0.5 px-2">
         {nav.map((n) => (
@@ -65,7 +67,7 @@ export function Sidebar({
             key={n.href}
             href={n.href}
             className={cn(
-              "relative flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] text-zinc-400 hover:bg-hover hover:text-zinc-100",
+              "relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-zinc-400 transition-colors hover:bg-hover hover:text-zinc-100",
               isActive(n.href, n.exact) && "bg-hover text-zinc-100",
             )}
           >
@@ -95,6 +97,9 @@ export function Sidebar({
           {() => (
             <>
               <div className="px-2 py-1.5 text-[11px] text-muted">{user.email}</div>
+              <MenuItem onClick={() => setMode(mode === "dark" ? "light" : "dark")}>
+                {mode === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />} {mode === "dark" ? "Light mode" : "Dark mode"}
+              </MenuItem>
               <MenuItem onClick={() => router.push("/account")}>
                 <KeyRound className="h-3.5 w-3.5" /> Change password
               </MenuItem>

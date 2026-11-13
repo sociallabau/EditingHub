@@ -12,8 +12,8 @@ export default async function TemplatesPage() {
   const templates = await db.template.findMany({ orderBy: { createdAt: "asc" }, include: { _count: { select: { projects: true } } } });
   return (
     <div className="h-full overflow-y-auto">
-      <header className="flex items-center justify-between border-b border-line px-4 py-2.5">
-        <h1 className="text-sm font-semibold">Project templates</h1>
+      <header className="flex items-center justify-between border-b border-line px-5 py-3">
+        <h1 className="page-title">Project templates</h1>
       </header>
       <div className="mx-auto max-w-4xl p-6">
         <p className="mb-4 text-xs text-muted">

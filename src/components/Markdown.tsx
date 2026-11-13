@@ -41,7 +41,7 @@ export function Markdown({ text, onToggleCheck }: { text: string; onToggleCheck?
           const done = m[1].toLowerCase() === "x";
           return (
             <label key={k} className="flex cursor-pointer items-start gap-2" onClick={(e) => e.stopPropagation()}>
-              <input type="checkbox" checked={done} onChange={() => onToggleCheck?.(i)} className="mt-1 accent-[#f2542d]" />
+              <input type="checkbox" checked={done} onChange={() => onToggleCheck?.(i)} className="mt-1 accent-[var(--color-accent)]" />
               <span className={done ? "text-zinc-500 line-through" : ""}>{inline(m[2], k)}</span>
             </label>
           );

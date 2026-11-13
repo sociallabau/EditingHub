@@ -5,7 +5,7 @@ overviews, Google Drive footage linking, uploads, timestamped video review, per-
 and in-app notifications.
 
 **Stack:** Next.js 15 (App Router) · Postgres + Prisma · Vercel Blob (video/footage storage) ·
-Google Drive Picker. Built to run on Vercel.
+Google Drive Picker · Astryx design system (chocolate theme, custom palette) · Claude (Anthropic SDK). Built to run on Vercel.
 
 ## Features
 
@@ -23,6 +23,11 @@ Google Drive Picker. Built to run on Vercel.
 - **Edited video + review** — upload .mp4/.mov (up to 5GB, straight to Blob), each upload is a new version (v1, v2…).
   Reviewers leave feedback pinned to the timestamp (markers on the timeline, click to jump), reply, resolve, then
   **Request changes** / **Approve** — which moves the card to the matching column automatically.
+- **Transcript** — each edit is transcribed in the reviewer's browser (Whisper, nothing leaves the computer); click any word to jump there, search what was said.
+- **AI caption check** — Claude reads the on-screen text frame by frame against the transcript and flags typos / caption-vs-speech mismatches; one click turns a finding into a timestamped note.
+- **AI brief** — the shooter picks raw clips from their computer (transcribed locally, not uploaded) and Claude drafts the editing brief: hooks, best soundbites with timestamps, suggested cut.
+- **Version compare** — two versions side by side in sync, with the previous version's notes to tick off.
+- **Draw on frame** — circle the problem on a paused frame; the drawing is saved with the note.
 - **Clients** — style guide, brand assets, reference edits and B-roll library per client, shown on every project for that client.
 - **People & notifications** — everyone has their own login and role. Tag people on a project (or @mention them in a comment)
   and they're notified of every change on it: uploads, links, comments, stage moves, priority/due changes, approvals.
@@ -44,6 +49,12 @@ Google Drive Picker. Built to run on Vercel.
 5. **Deploy.** The build runs the database migrations and creates the default columns, templates and your admin
    account (only if they don't exist yet — redeploys never overwrite your data).
 6. Log in → **Team** → add your editors, videographers and account managers with temporary passwords.
+
+### AI features (caption check + AI brief)
+
+Either add `ANTHROPIC_API_KEY` (from console.anthropic.com) to the Vercel environment variables, **or** add a card to
+Vercel AI Gateway (Vercel dashboard → AI Gateway) — the app then uses the project's own Vercel credentials with no key.
+Transcription needs neither; it runs in the browser.
 
 ### Optional: "Browse Drive" button
 

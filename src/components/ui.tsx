@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { ChevronsUp, Equal, ChevronDown, ArrowUpDown, X, Leaf } from "lucide-react";
+import { ChevronsUp, Equal, ChevronDown, ArrowUpDown, Leaf } from "lucide-react";
+import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { cn, initials, PRIORITY_LABEL, type PriorityT } from "@/lib/utils";
 
 export function Avatar({
@@ -36,7 +37,7 @@ export function AvatarStack({ users, max = 4, size = 20 }: { users: { id: string
       ))}
       {users.length > max && (
         <span
-          className="inline-flex items-center justify-center rounded-full bg-zinc-700 text-[9px] font-semibold ring-2 ring-bg"
+          className="inline-flex items-center justify-center rounded-full bg-hover text-[9px] font-semibold text-ink ring-2 ring-bg"
           style={{ width: size, height: size }}
         >
           +{users.length - max}
@@ -134,7 +135,7 @@ export function Menu({
             ref={panel}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="fixed z-50 max-h-[320px] overflow-auto rounded-lg border border-line bg-card p-1 shadow-2xl"
+            className="fixed z-50 max-h-[320px] overflow-auto rounded-xl border border-line bg-pop p-1 shadow-[0_12px_32px_var(--eh-shadow)]"
             style={{ top: pos.top, left: pos.left, width }}
           >
             {children(() => setOpen(false))}
@@ -187,26 +188,11 @@ export function Modal({
   children: ReactNode;
   width?: number;
 }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-  if (!open) return null;
-  return createPortal(
-    <div className="fixed inset-0 z-40 flex items-start justify-center overflow-auto bg-black/60 p-4 pt-[10vh]" onMouseDown={onClose} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
-      <div className="panel w-full shadow-2xl" style={{ maxWidth: width }} onMouseDown={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between border-b border-line px-4 py-3">
-          <h2 className="text-sm font-semibold">{title}</h2>
-          <button className="btn-ghost p-1" onClick={onClose} aria-label="Close">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="p-4">{children}</div>
-      </div>
-    </div>,
-    document.body,
+  return (
+    <Dialog isOpen={open} onOpenChange={(o) => !o && onClose()} width={width} maxHeight="88vh">
+      <DialogHeader title={title} onOpenChange={(o) => !o && onClose()} hasDivider />
+      <div className="overflow-y-auto p-5">{children}</div>
+    </Dialog>
   );
 }
 
@@ -216,7 +202,7 @@ export function StageDot({ color, className }: { color: string; className?: stri
 
 export function StagePill({ name, color }: { name: string; color: string }) {
   return (
-    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-semibold text-black" style={{ background: color }}>
+    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-semibold tracking-wide text-[#2c1f1c]" style={{ background: color }}>
       {name}
     </span>
   );

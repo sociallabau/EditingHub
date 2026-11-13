@@ -4,12 +4,12 @@ import bcrypt from "bcryptjs";
 const db = new PrismaClient();
 
 const STAGES = [
-  { name: "Content Shot", color: "#9ca3af", kind: "NORMAL" },
-  { name: "To Edit", color: "#ef4444", kind: "NORMAL" },
-  { name: "Currently Editing", color: "#06b6d4", kind: "NORMAL" },
-  { name: "Revisions Needed", color: "#f97316", kind: "REVISIONS" },
-  { name: "To Be Approved", color: "#22c55e", kind: "REVIEW" },
-  { name: "Approved", color: "#84cc16", kind: "APPROVED" },
+  { name: "Content Shot", color: "#baa788", kind: "NORMAL" },
+  { name: "To Edit", color: "#c4674f", kind: "NORMAL" },
+  { name: "Currently Editing", color: "#7fa3ad", kind: "NORMAL" },
+  { name: "Revisions Needed", color: "#d39547", kind: "REVISIONS" },
+  { name: "To Be Approved", color: "#9db57a", kind: "REVIEW" },
+  { name: "Approved", color: "#6f9160", kind: "APPROVED" },
 ] as const;
 
 const BRIEF = `## Edit like this
@@ -34,7 +34,7 @@ const TEMPLATES = [
   {
     name: "Suburb Highlight",
     description: "Suburb showcase — lifestyle b-roll, local spots, agent to camera.",
-    color: "#22c55e",
+    color: "#9db57a",
     defaultPriority: "MEDIUM",
     sections: [
       { key: "raw", title: "Raw Footage", hint: "Main camera / A-roll for this shoot" },
@@ -53,7 +53,7 @@ const TEMPLATES = [
   {
     name: "Agent Interview",
     description: "Sit-down interview / talking head with cut-aways.",
-    color: "#6366f1",
+    color: "#7b6a9c",
     defaultPriority: "HIGH",
     sections: [
       { key: "raw", title: "Raw Video", hint: "Interview camera angles + audio" },
@@ -68,7 +68,7 @@ const TEMPLATES = [
   {
     name: "Listing / Property",
     description: "Property tour, coming soon, just listed or sold case study.",
-    color: "#f59e0b",
+    color: "#c99a3c",
     defaultPriority: "HIGH",
     sections: [
       { key: "raw", title: "Raw Footage", hint: "Walkthrough, gimbal and agent pieces to camera" },
@@ -87,7 +87,7 @@ const TEMPLATES = [
   {
     name: "Giveaway / Promo",
     description: "Competitions, giveaways, event promos.",
-    color: "#ec4899",
+    color: "#b8687e",
     defaultPriority: "URGENT",
     sections: [
       { key: "raw", title: "Raw Video", hint: "Main footage" },
@@ -99,7 +99,7 @@ const TEMPLATES = [
   {
     name: "Blank",
     description: "Empty project with a raw footage section.",
-    color: "#9ca3af",
+    color: "#baa788",
     defaultPriority: "NONE",
     sections: [{ key: "raw", title: "Raw Video", hint: "Link footage from Google Drive or upload" }],
     pages: [{ title: "Outline", content: "" }],
@@ -129,7 +129,7 @@ async function main() {
         email,
         name: process.env.SEED_ADMIN_NAME || "Admin",
         role: "ADMIN",
-        color: "#f2542d",
+        color: "#704e32",
         passwordHash: await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD || "changeme123", 10),
       },
     });

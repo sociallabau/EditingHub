@@ -14,6 +14,7 @@ export default async function VideoPage({ params }: { params: Promise<{ id: stri
     where: { id: videoId, projectId: id },
     include: {
       uploadedBy: { select: { name: true } },
+      transcript: true,
       comments: {
         orderBy: { createdAt: "asc" },
         include: { author: { select: { id: true, name: true, color: true } } },
@@ -40,11 +41,15 @@ export default async function VideoPage({ params }: { params: Promise<{ id: stri
         uploadedBy: video.uploadedBy.name,
         createdAt: video.createdAt.toISOString(),
       }}
+      transcript={(video.transcript?.segments as never) ?? null}
+      aiQa={(video.aiQa as never) ?? null}
+      aiQaAt={video.aiQaAt?.toISOString() ?? null}
       comments={video.comments.map((c) => ({
         id: c.id,
         body: c.body,
         timestamp: c.timestamp,
         resolved: c.resolved,
+        drawing: (c.drawing as never) ?? null,
         parentId: c.parentId,
         createdAt: c.createdAt.toISOString(),
         author: c.author,

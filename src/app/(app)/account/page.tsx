@@ -6,8 +6,8 @@ export default async function AccountPage() {
   const user = await requireUser();
   return (
     <div className="h-full overflow-y-auto">
-      <header className="border-b border-line px-4 py-2.5">
-        <h1 className="text-sm font-semibold">Account</h1>
+      <header className="border-b border-line px-5 py-3">
+        <h1 className="page-title">Account</h1>
       </header>
       <div className="mx-auto max-w-md space-y-4 p-6">
         <div>

@@ -15,8 +15,8 @@ export function TeamManager({ users, me }: { users: U[]; me: string }) {
   const [, start] = useTransition();
   return (
     <div className="h-full overflow-y-auto">
-      <header className="border-b border-line px-4 py-2.5">
-        <h1 className="text-sm font-semibold">Team</h1>
+      <header className="border-b border-line px-5 py-3">
+        <h1 className="page-title">Team</h1>
       </header>
       <div className="mx-auto max-w-4xl space-y-6 p-6">
         <form action={action} className="panel grid gap-2 p-4 sm:grid-cols-[1fr_1fr_1fr_auto_auto]">

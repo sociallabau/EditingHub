@@ -1,21 +1,141 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 
-:root { color-scheme: dark; }
-html, body { background: #0e0e10; color: #e7e7ea; }
-body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 13px; }
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-chocolate/theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
 
-* { scrollbar-width: thin; scrollbar-color: #2e2e33 transparent; }
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: #2e2e33; border-radius: 8px; }
+/*
+ * Editing Hub palette, layered over Astryx's chocolate theme.
+ *   espresso #2C1F1C · walnut #704E32 · camel #977C58 · sand #BAA788 · cream #EBE9DF
+ * Every colour is a light-dark() pair, so `color-scheme` picks the side — globally via
+ * html[data-theme], or locally with .scheme-dark (sidebar, video player).
+ */
+[data-astryx-theme="chocolate"] {
+  --color-background-body: light-dark(#ebe9df, #1d1412);
+  --color-background-surface: light-dark(#f3f1e9, #2c1f1c);
+  --color-background-card: light-dark(#fbfaf6, #372823);
+  --color-background-popover: light-dark(#fdfcf9, #3a2a25);
+  --color-background-muted: light-dark(#e0dccd, #46342d);
+  --color-background-inverted: light-dark(#2c1f1c, #ebe9df);
+  --color-text-primary: light-dark(#2c1f1c, #ebe9df);
+  --color-text-secondary: light-dark(#704e32, #baa788);
+  --color-text-disabled: light-dark(#977c58, #977c58);
+  --color-text-accent: light-dark(#704e32, #d9c7a6);
+  --color-accent: light-dark(#704e32, #baa788);
+  --color-accent-muted: light-dark(#704e3222, #baa78826);
+  --color-on-accent: light-dark(#f6f4ec, #2c1f1c);
+  --color-border: light-dark(#d5ccb8, #ebe9df1c);
+  --color-border-emphasized: light-dark(#baa788, #704e32);
+  --color-track: light-dark(#d5ccb8, #4d3a32);
+  --eh-faint: light-dark(#a8926f, #8a7256);
+  --eh-shadow: light-dark(#2c1f1c1a, #00000066);
+}
+
+@theme inline {
+  --color-bg: var(--color-background-body);
+  --color-panel: var(--color-background-surface);
+  --color-card: var(--color-background-card);
+  --color-pop: var(--color-background-popover);
+  --color-hover: var(--color-background-muted);
+  --color-line: var(--color-border);
+  --color-line-strong: var(--color-border-emphasized);
+  --color-muted: var(--color-text-secondary);
+  --color-accent: var(--color-accent);
+  --color-on-accent: var(--color-on-accent);
+  --color-ink: var(--color-text-primary);
+
+  /* the old neutral scale now resolves to warm ink tones, so text adapts to light/dark */
+  --color-zinc-50: var(--color-text-primary);
+  --color-zinc-100: var(--color-text-primary);
+  --color-zinc-200: var(--color-text-primary);
+  --color-zinc-300: color-mix(in srgb, var(--color-text-primary) 82%, var(--color-text-secondary));
+  --color-zinc-400: var(--color-text-secondary);
+  --color-zinc-500: var(--color-text-disabled);
+  --color-zinc-600: var(--eh-faint);
+  --color-zinc-700: var(--color-track);
+  --color-zinc-900: var(--color-background-popover);
+
+  /* status colours tuned for both cream and espresso backgrounds */
+  --color-red-400: light-dark(#b3402f, #f08b78);
+  --color-red-500: light-dark(#b3402f, #e8705c);
+  --color-orange-300: light-dark(#a8581a, #f0b47a);
+  --color-orange-400: light-dark(#b8621b, #eda25e);
+  --color-amber-300: light-dark(#8f6a12, #ecc977);
+  --color-amber-400: light-dark(#9a7212, #e6bd62);
+  --color-amber-500: light-dark(#9a7212, #e6bd62);
+  --color-green-500: light-dark(#4c7a3d, #8fc07c);
+  --color-green-600: light-dark(#4c7a3d, #5d9149);
+  --color-sky-300: light-dark(#34647d, #a9d3e6);
+  --color-sky-400: light-dark(#34647d, #8cc4dd);
+  --color-sky-500: light-dark(#34647d, #8cc4dd);
+  --color-indigo-400: var(--color-accent);
+
+  --font-heading: var(--font-family-heading);
+  --font-sans: var(--font-family-body);
+  --text-xxs: 11px;
+  --text-xxs--line-height: 14px;
+}
+
+html,
+body {
+  background: var(--color-background-body);
+  color: var(--color-text-primary);
+}
+body {
+  font-family: var(--font-family-body);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+.scheme-dark {
+  color-scheme: dark;
+  color: var(--color-text-primary);
+}
+button,
+[role="button"],
+label[for],
+select {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-track) transparent;
+}
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
 
 @layer components {
-  .btn { @apply inline-flex items-center gap-1.5 rounded-md border border-line bg-card px-2.5 py-1.5 text-xs font-medium text-zinc-200 hover:bg-hover disabled:opacity-50 transition-colors; }
-  .btn-primary { @apply inline-flex items-center gap-1.5 rounded-md bg-accent px-2.5 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50; }
-  .btn-ghost { @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-muted hover:bg-hover hover:text-zinc-200 disabled:opacity-50; }
-  .input { @apply w-full rounded-md border border-line bg-bg px-2.5 py-1.5 text-[13px] text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-zinc-500; }
-  .chip { @apply inline-flex items-center gap-1.5 rounded-md border border-line bg-card px-2 py-1 text-xs font-medium text-zinc-300; }
-  .label { @apply mb-1 block text-xs font-medium text-muted; }
-  .panel { @apply rounded-lg border border-line bg-panel; }
+  .btn {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-line bg-card px-3 py-1.5 text-xs font-medium text-ink shadow-[0_1px_0_var(--eh-shadow)] transition-all duration-150 hover:border-line-strong hover:bg-pop active:translate-y-px disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-on-accent shadow-[0_1px_2px_var(--eh-shadow)] transition-all duration-150 hover:brightness-110 active:translate-y-px disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-muted transition-colors duration-150 hover:bg-hover hover:text-ink disabled:opacity-50;
+  }
+  .input {
+    @apply w-full rounded-lg border border-line bg-pop px-3 py-1.5 text-[13px] text-ink outline-none transition-colors placeholder:text-zinc-600 focus:border-accent focus:ring-2 focus:ring-accent/15;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-line bg-card px-2.5 py-1 text-xs font-medium text-ink;
+  }
+  .label {
+    @apply mb-1 block text-[11px] font-semibold uppercase tracking-wider text-muted;
+  }
+  .panel {
+    @apply rounded-xl border border-line bg-panel;
+  }
+  .page-title {
+    @apply font-heading text-[19px] font-medium tracking-tight text-ink;
+  }
+  .lux-card {
+    @apply rounded-xl border border-line bg-card shadow-[0_1px_2px_var(--eh-shadow)] transition-all duration-200;
+  }
 }

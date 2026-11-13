@@ -21,6 +21,10 @@ import {
   AlertCircle,
   Check,
   Upload,
+  Pencil,
+  Undo2,
+  Columns2,
+  X,
 } from "lucide-react";
 import { addComment, deleteComment, resolveComment, setVideoDuration, setVideoStatus } from "@/lib/actions";
 import { cn, fmtTime } from "@/lib/utils";
@@ -28,6 +32,10 @@ import { Avatar, Menu, MenuItem } from "../ui";
 import { CommentText, MentionInput, type MentionInputHandle, type MentionUser } from "../MentionInput";
 import { STATUS_ICON } from "../project/ProjectNav";
 import { STATUS_LABEL } from "../project/VideoGrid";
+import { DrawLayer, PEN_COLORS, type Stroke } from "./DrawLayer";
+import { TranscriptTab } from "./TranscriptTab";
+import { AiCheckTab, type QaIssue } from "./AiCheckTab";
+import type { Segment } from "@/lib/transcribe";
 
 type ReviewComment = {
   id: string;
@@ -37,6 +45,7 @@ type ReviewComment = {
   parentId: string | null;
   createdAt: string;
   author: MentionUser;
+  drawing: Stroke[] | null;
 };
 
 type Status = "PENDING" | "CHANGES_REQUESTED" | "APPROVED";
@@ -49,6 +58,9 @@ export function VideoReview({
   versions,
   video,
   comments,
+  transcript,
+  aiQa,
+  aiQaAt,
 }: {
   me: { id: string; role: string };
   users: MentionUser[];
@@ -66,6 +78,9 @@ export function VideoReview({
     createdAt: string;
   };
   comments: ReviewComment[];
+  transcript: Segment[] | null;
+  aiQa: QaIssue[] | null;
+  aiQaAt: string | null;
 }) {
   const router = useRouter();
   const [, start] = useTransition();
@@ -91,6 +106,10 @@ export function VideoReview({
   const [sort, setSort] = useState<"timestamp" | "newest">("timestamp");
   const [showResolved, setShowResolved] = useState(true);
   const [focused, setFocused] = useState<string | null>(null);
+  const [tab, setTab] = useState<"feedback" | "transcript" | "ai">("feedback");
+  const [drawMode, setDrawMode] = useState(false);
+  const [penColor, setPenColor] = useState(PEN_COLORS[0]);
+  const [draft, setDraft] = useState<Stroke[]>([]);
   const [local, setLocal] = useState(comments);
   useEffect(() => setLocal(comments), [comments]);
   // until someone starts typing, the comment timestamp follows the playhead
@@ -151,21 +170,25 @@ export function VideoReview({
   };
 
   const send = () => {
-    const text = body.trim();
+    const text = body.trim() || (draft.length ? "See drawing" : "");
     if (!text) return;
-    const ts = stampOn ? stamp : null;
+    const ts = stampOn || draft.length ? stamp : null;
+    const drawing = draft.length ? draft : null;
+    setDraft([]);
+    setDrawMode(false);
     const optimistic: ReviewComment = {
       id: `tmp-${Date.now()}`,
       body: text,
       timestamp: ts,
       resolved: false,
       parentId: null,
+      drawing,
       createdAt: new Date().toISOString(),
       author: users.find((u) => u.id === me.id) ?? { id: me.id, name: "You", color: "#666" },
     };
     setLocal((l) => [...l, optimistic]);
     setBody("");
-    start(() => addComment({ projectId: project.id, videoId: video.id, body: text, timestamp: ts }));
+    start(() => addComment({ projectId: project.id, videoId: video.id, body: text, timestamp: ts, drawing }));
   };
 
   const sendReply = (parentId: string) => {
@@ -179,6 +202,25 @@ export function VideoReview({
   const changeStatus = (s: Status) => {
     if (s === "APPROVED" && openCount > 0 && !confirm(`There are ${openCount} unresolved notes. Approve anyway?`)) return;
     start(() => setVideoStatus(video.id, s));
+  };
+
+  // strokes to show: the draft while drawing, otherwise any note pinned at (or selected for) this moment
+  const shownStrokes = drawMode || draft.length
+    ? draft
+    : local
+        .filter((c) => c.drawing?.length && (c.id === focused ? Math.abs((c.timestamp ?? -9) - time) < 1.5 : Math.abs((c.timestamp ?? -9) - time) < 0.4))
+        .flatMap((c) => c.drawing!);
+  const prev = versions.find((v) => v.version === video.version - 1);
+
+  const toggleDraw = () => {
+    const v = ref.current;
+    if (!drawMode && v) {
+      v.pause();
+      setStamp(v.currentTime);
+      setStampOn(true);
+      setTab("feedback");
+    }
+    setDrawMode((d) => !d);
   };
 
   const pct = (t: number) => (duration ? (t / duration) * 100 : 0);
@@ -213,6 +255,11 @@ export function VideoReview({
               ))
             }
           </Menu>
+        )}
+        {prev && (
+          <Link href={`/projects/${project.id}/compare?a=${prev.id}&b=${video.id}`} className="btn" title="Compare with the previous version">
+            <Columns2 className="h-3.5 w-3.5" /> Compare v{prev.version}
+          </Link>
         )}
         <Link href={`/projects/${project.id}?tab=videos`} className="btn" title="Upload a new version">
           <Upload className="h-3.5 w-3.5" /> New version
@@ -251,8 +298,8 @@ export function VideoReview({
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* player */}
-        <div ref={wrap} className="flex min-h-[50vh] min-w-0 flex-1 flex-col bg-black">
-          <div className="relative flex min-h-0 flex-1 items-center justify-center" onClick={toggle}>
+        <div ref={wrap} className="scheme-dark flex min-h-[50vh] min-w-0 flex-1 flex-col bg-black">
+          <div className="relative flex min-h-0 flex-1 items-center justify-center" onClick={() => !drawMode && toggle()}>
             <video
               ref={ref}
               src={video.url}
@@ -271,12 +318,36 @@ export function VideoReview({
               }}
               onError={() => setPlayError(true)}
             />
+            <DrawLayer videoRef={ref} strokes={shownStrokes} drawing={drawMode} color={penColor} onChange={setDraft} />
+            {drawMode && (
+              <div
+                className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-2 rounded-full border border-line bg-panel/95 px-3 py-1.5 text-xs shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="text-muted">Draw on the frame</span>
+                {PEN_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setPenColor(c)}
+                    className={cn("h-4 w-4 rounded-full border border-black/40", penColor === c && "ring-2 ring-white ring-offset-1 ring-offset-black")}
+                    style={{ background: c }}
+                    aria-label={`Pen colour ${c}`}
+                  />
+                ))}
+                <button className="btn-ghost p-1" title="Undo" onClick={() => setDraft((d) => d.slice(0, -1))}>
+                  <Undo2 className="h-3.5 w-3.5" />
+                </button>
+                <button className="btn-ghost p-1" title="Cancel drawing" onClick={() => (setDraft([]), setDrawMode(false))}>
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
             {playError && (
               <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 rounded-lg bg-zinc-900/95 p-4 text-center text-[13px]">
                 This browser can&apos;t play this file — it&apos;s probably a ProRes/HEVC .mov. Download it, or re-export as an H.264 .mp4 for review.
               </div>
             )}
-            {!playing && !playError && (
+            {!playing && !playError && !drawMode && shownStrokes.length === 0 && (
               <div className="pointer-events-none absolute flex h-14 w-14 items-center justify-center rounded-full bg-black/50">
                 <Play className="ml-1 h-6 w-6 fill-white" />
               </div>
@@ -350,7 +421,7 @@ export function VideoReview({
                   setMuted(false);
                   setVolume(v.volume);
                 }}
-                className="w-20 accent-indigo-400"
+                className="w-20 accent-[var(--color-accent)]"
               />
               <span className="font-mono text-xs text-zinc-300">
                 {fmtTime(time)} / {fmtTime(duration)}
@@ -384,10 +455,51 @@ export function VideoReview({
 
         {/* comments */}
         <aside className="flex w-full shrink-0 flex-col border-l border-line lg:w-[380px]">
-          <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
-            <div className="text-xs font-semibold">
-              Feedback <span className="ml-1 text-muted">{openCount} open</span>
-            </div>
+          <div className="flex items-center gap-1 border-b border-line px-3 pt-2">
+            {(
+              [
+                ["feedback", `Feedback${openCount ? ` · ${openCount}` : ""}`],
+                ["transcript", "Transcript"],
+                ["ai", `AI check${aiQa?.length ? ` · ${aiQa.length}` : ""}`],
+              ] as const
+            ).map(([k, label]) => (
+              <button
+                key={k}
+                onClick={() => setTab(k)}
+                className={cn(
+                  "-mb-px border-b-2 px-2.5 pb-2 pt-1 text-xs font-medium transition-colors",
+                  tab === k ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className={tab === "transcript" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+            <TranscriptTab
+              projectId={project.id}
+              videoId={video.id}
+              videoUrl={video.url}
+              videoName={video.name}
+              segments={transcript}
+              time={time}
+              onSeek={seek}
+            />
+          </div>
+          {tab === "ai" && (
+            <AiCheckTab
+              projectId={project.id}
+              videoId={video.id}
+              videoUrl={video.url}
+              issues={aiQa}
+              checkedAt={aiQaAt}
+              hasTranscript={!!transcript}
+              onSeek={seek}
+            />
+          )}
+          {tab === "feedback" && (
+          <>
+          <div className="flex items-center justify-end border-b border-line px-3 py-1.5">
             <div className="flex items-center gap-1">
               <button className="btn-ghost" onClick={() => setShowResolved((s) => !s)}>
                 {showResolved ? "Hide resolved" : "Show resolved"}
@@ -450,6 +562,11 @@ export function VideoReview({
                           {fmtTime(c.timestamp)}
                         </button>
                       )}
+                      {c.drawing?.length ? (
+                        <span className="ml-2 inline-flex items-center gap-1 rounded bg-accent/15 px-1.5 py-0.5 text-[10px] font-medium text-ink">
+                          <Pencil className="h-2.5 w-2.5" /> drawing
+                        </span>
+                      ) : null}
                       <div className={cn("mt-0.5 text-[13px] text-zinc-100", c.resolved && "line-through decoration-zinc-500")}>
                         <CommentText text={c.body} />
                       </div>
@@ -514,6 +631,7 @@ export function VideoReview({
                 placeholder="Leave feedback at this moment… (@ to mention)"
               />
               <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1">
                 <button
                   className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs", stampOn ? "bg-sky-500/15 text-sky-300" : "text-muted hover:bg-hover")}
                   onClick={() => {
@@ -524,12 +642,22 @@ export function VideoReview({
                 >
                   <Clock className="h-3.5 w-3.5" /> {stampOn ? fmtTime(stamp) : "No timestamp"}
                 </button>
-                <button className="btn-ghost p-1.5" onClick={send} disabled={!body.trim()}>
+                <button
+                  className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs", drawMode || draft.length ? "bg-accent/15 text-ink" : "text-muted hover:bg-hover")}
+                  onClick={toggleDraw}
+                  title="Draw on the frame"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> {draft.length ? `${draft.length} mark${draft.length > 1 ? "s" : ""}` : "Draw"}
+                </button>
+                </div>
+                <button className="btn-ghost p-1.5" onClick={send} disabled={!body.trim() && !draft.length}>
                   <SendHorizonal className="h-4 w-4" />
                 </button>
               </div>
             </div>
           </div>
+          </>
+          )}
         </aside>
       </div>
     </div>
