@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
   DragOverlay,
   PointerSensor,
-  closestCorners,
+  closestCenter,
+  pointerWithin,
+  rectIntersection,
+  type CollisionDetection,
   useDroppable,
   useSensor,
   useSensors,
@@ -104,6 +107,27 @@ export function Board({ projects, meta, me }: { projects: BoardProject[]; meta: 
   const [dragCols, setDragCols] = useState<Record<string, string[]> | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const cols = dragCols ?? derived;
+
+  // Pointer-first collision: whichever column the cursor is over wins. (Corner-distance
+  // matching preferred small cards in the origin column over a tall neighbouring column.)
+  const colsRef = useRef<Record<string, string[]>>({});
+  const collision: CollisionDetection = useCallback((args) => {
+    const hits = pointerWithin(args);
+    const pool = hits.length ? hits : rectIntersection(args);
+    const card = pool.find((h) => !(h.id in colsRef.current));
+    if (card) return [card];
+    const column = pool[0];
+    if (!column) return [];
+    const items = colsRef.current[String(column.id)] ?? [];
+    if (!items.length) return [column];
+    const inside = closestCenter({
+      ...args,
+      droppableContainers: args.droppableContainers.filter((c) => items.includes(String(c.id))),
+    });
+    return inside.length ? [inside[0]] : [column];
+  }, []);
+
+  colsRef.current = cols;
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const findCol = (id: string, c = cols) => (id in c ? id : Object.keys(c).find((k) => c[k].includes(id)));
@@ -332,7 +356,7 @@ export function Board({ projects, meta, me }: { projects: BoardProject[]; meta: 
 
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={collision}
         onDragStart={onDragStart}
         onDragOver={onDragOver}
         onDragEnd={onDragEnd}
@@ -360,6 +384,7 @@ export function Board({ projects, meta, me }: { projects: BoardProject[]; meta: 
                   selected={selected.has(p.id)}
                   onToggle={() => toggleSelect(p.id)}
                   onOpen={() => router.push(`/projects/${p.id}`)}
+                  onHover={() => router.prefetch(`/projects/${p.id}`)}
                   onPriority={(pr) => setPriority(p.id, pr)}
                   onMove={(stageId) => {
                     setLocal((ps) => ps.map((x) => (x.id === p.id ? { ...x, stageId } : x)));
@@ -501,7 +526,7 @@ function dueInfo(dueDate: string | null) {
   return { label: format(d, "do MMM"), overdue };
 }
 
-function CardBody({ project: p }: { project: BoardProject }) {
+function CardBody({ project: p, progress }: { project: BoardProject; progress?: number }) {
   const due = dueInfo(p.dueDate);
   return (
     <div
@@ -524,6 +549,11 @@ function CardBody({ project: p }: { project: BoardProject }) {
         {p.client ? <EvergreenLabel name={p.client.name} color={p.client.color} /> : <span className="text-xs text-zinc-600">No client</span>}
         <PriorityLabel priority={p.priority} />
       </div>
+      {progress != null && (
+        <div className="mt-2.5 h-1 rounded-full bg-hover" title={`${Math.round(progress * 100)}% through the pipeline`}>
+          <div className="h-full rounded-full bg-accent shadow-[0_0_8px_var(--eh-glow)]" style={{ width: `${progress * 100}%` }} />
+        </div>
+      )}
       <div className="mt-2 flex items-center justify-between">
         {due ? (
           <span className={cn("inline-flex items-center gap-1.5 text-xs", due.overdue ? "text-red-400" : "text-zinc-300")}>
@@ -562,6 +592,7 @@ function Card({
   selected,
   onToggle,
   onOpen,
+  onHover,
   onPriority,
   onMove,
   onArchive,
@@ -574,6 +605,7 @@ function Card({
   selected: boolean;
   onToggle: () => void;
   onOpen: () => void;
+  onHover: () => void;
   onPriority: (p: PriorityT) => void;
   onMove: (stageId: string) => void;
   onArchive: () => void;
@@ -584,8 +616,9 @@ function Card({
     <div
       className={cn("relative cursor-pointer", selected && "rounded-lg ring-2 ring-accent")}
       onClick={() => (selecting ? onToggle() : onOpen())}
+      onMouseEnter={onHover}
     >
-      <CardBody project={p} />
+      <CardBody project={p} progress={(stages.findIndex((s) => s.id === p.stageId) + 1) / Math.max(1, stages.length)} />
       <div className="absolute right-1.5 top-1.5">
         {selecting ? (
           <span className="flex h-6 w-6 items-center justify-center rounded bg-card/80">

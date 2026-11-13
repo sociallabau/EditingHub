@@ -105,6 +105,10 @@ body {
     var(--color-background-body);
   background-attachment: fixed;
 }
+.eh-canvas {
+  background-image: radial-gradient(light-dark(#2c1f1c14, #ebe9df0d) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
 .eh-sidebar {
   background: var(--eh-glass);
   backdrop-filter: blur(18px);

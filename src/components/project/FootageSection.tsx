@@ -238,14 +238,19 @@ export function FootageSection({
           }}
         >
           <div>
-            <div className="text-[13px] font-medium text-zinc-200">Link {section.title} files</div>
+            <div className="text-[13px] font-medium text-zinc-200">Add {section.title} files</div>
             <div className="mt-1 max-w-md text-[13px] text-muted">
-              Add links to the files in Google Drive, Dropbox etc so your editors can access them — or drop files here to upload.
+              Drag files here or click Upload to put them straight into the hub — or link a Google Drive / Dropbox folder.
             </div>
           </div>
-          <button className="btn shrink-0" onClick={() => (driveEnabled ? browseDrive() : setAdding(true))}>
-            <Link2 className="h-3.5 w-3.5" /> Add Link
-          </button>
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+            <button className="btn-primary" onClick={() => fileRef.current?.click()}>
+              <Upload className="h-3.5 w-3.5" /> Upload files
+            </button>
+            <button className="btn" onClick={() => (driveEnabled ? browseDrive() : setAdding(true))}>
+              <Link2 className="h-3.5 w-3.5" /> Add Link
+            </button>
+          </div>
         </div>
       ) : (
         <ul

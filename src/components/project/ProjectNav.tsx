@@ -16,6 +16,7 @@ import {
   CircleDashed,
   AlertCircle,
   History,
+  Image as ImageIcon,
   Sparkles,
   Archive,
 } from "lucide-react";
@@ -30,6 +31,7 @@ type NavProject = {
   stageId: string;
   dueDate: string | null;
   thumb: string | null;
+  thumbCount: number;
   sections: { key: string; title: string; count: number }[];
   pages: { id: string; title: string }[];
   videos: { id: string; name: string; version: number; status: string }[];
@@ -54,6 +56,7 @@ export function ProjectNav({ project: p, stages }: { project: NavProject; stages
     <Link
       key={href}
       href={href}
+      prefetch
       className={cn(
         "group flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] text-zinc-300 hover:bg-hover",
         active && "bg-hover text-zinc-50",
@@ -121,6 +124,15 @@ export function ProjectNav({ project: p, stages }: { project: NavProject; stages
         </label>
       </div>
 
+      <div className="mb-3 flex gap-1" title={`Stage ${stages.findIndex((s) => s.id === p.stageId) + 1} of ${stages.length}: ${stage?.name}`}>
+        {stages.map((s, i) => (
+          <span
+            key={s.id}
+            className={cn("h-1 flex-1 rounded-full", i <= stages.findIndex((x) => x.id === p.stageId) ? "bg-accent shadow-[0_0_8px_var(--eh-glow)]" : "bg-hover")}
+          />
+        ))}
+      </div>
+
       <nav className="space-y-0.5">
         {item(base, onBase && tab === "overview", <Info className="h-4 w-4 text-muted" />, "Overview")}
 
@@ -135,6 +147,14 @@ export function ProjectNav({ project: p, stages }: { project: NavProject; stages
             s.title,
             <span className="text-[11px] text-muted">{s.count || ""}</span>,
           ),
+        )}
+
+        {item(
+          `${base}?tab=thumbnails`,
+          onBase && tab === "thumbnails",
+          <ImageIcon className="h-4 w-4 text-muted" />,
+          "Thumbnails",
+          <span className="text-[11px] text-muted">{p.thumbCount || ""}</span>,
         )}
 
         <div className="flex items-center justify-between px-2 pb-1 pt-3 text-[11px] font-medium uppercase tracking-wide text-zinc-500">

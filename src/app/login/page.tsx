@@ -14,7 +14,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <div className="text-xs text-muted">Social Lab</div>
           </div>
         </div>
-        <LoginForm next={next && next.startsWith("/") ? next : "/projects"} />
+        <LoginForm next={next && next.startsWith("/") ? next : "/pulse"} />
         <p className="mt-4 text-xs text-muted">No account? Ask an admin to add you from the Team page.</p>
       </div>
     </main>

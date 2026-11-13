@@ -108,6 +108,8 @@ model Project {
   position    Float     @default(0)
   archived    Boolean   @default(false)
   archivedAt  DateTime?
+  /// chosen cover image for the board card (from the Thumbnails tab)
+  coverUrl    String?
   /// copied from the template when created; [{ key, title, hint }]
   sections    Json      @default("[]")
   createdAt   DateTime  @default(now())

@@ -52,7 +52,7 @@ export async function login(_: unknown, form: FormData) {
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
-  redirect(String(form.get("next") || "/projects"));
+  redirect(String(form.get("next") || "/pulse"));
 }
 
 export async function logout() {
@@ -352,7 +352,7 @@ export async function addLinks(
   const user = await requireUser();
   if (!items.length) return;
   for (const it of items) {
-    if (!/^https?:\/\//i.test(it.url)) throw new Error("Links must start with http:// or https://");
+    if (!/^https?:\/\//i.test(it.url) && !(it.kind === "UPLOAD" && it.url.startsWith("/uploads/"))) throw new Error("Links must start with http:// or https://");
   }
   await db.link.createMany({
     data: items.map((it) => ({
@@ -382,6 +382,7 @@ export async function deleteLink(id: string) {
   await requireUser();
   const link = await db.link.delete({ where: { id } });
   if (link.kind === "UPLOAD") await removeBlob(link.url);
+  if (link.projectId) await db.project.updateMany({ where: { id: link.projectId, coverUrl: link.url }, data: { coverUrl: null } });
   refresh();
 }
 
@@ -688,5 +689,13 @@ export async function deleteTranscript(id: string) {
 export async function saveVideoQa(videoId: string, issues: { time: number; seen: string; issue: string; suggestion: string }[]) {
   await requireUser();
   await db.video.update({ where: { id: videoId }, data: { aiQa: issues as Prisma.InputJsonValue, aiQaAt: new Date() } });
+  refresh();
+}
+
+/* ───────────────────────── thumbnails ───────────────────────── */
+
+export async function setCover(projectId: string, url: string | null) {
+  await requireUser();
+  await db.project.update({ where: { id: projectId }, data: { coverUrl: url } });
   refresh();
 }

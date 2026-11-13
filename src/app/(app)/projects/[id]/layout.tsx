@@ -6,6 +6,7 @@ export default async function ProjectLayout({ children, params }: { children: Re
   const { id } = await params;
   const [p, meta] = await Promise.all([getProject(id), getBoardMeta()]);
   const sections = p.sections as Section[];
+  const thumbs = p.links.filter((l) => l.section === "thumbnails").reverse();
   return (
     <div className="flex h-full">
       <ProjectNav
@@ -15,7 +16,8 @@ export default async function ProjectLayout({ children, params }: { children: Re
           archived: p.archived,
           stageId: p.stageId,
           dueDate: p.dueDate?.toISOString() ?? null,
-          thumb: p.videos[0]?.thumbnailUrl ?? null,
+          thumb: p.coverUrl ?? thumbs[0]?.url ?? p.videos[0]?.thumbnailUrl ?? null,
+          thumbCount: thumbs.length,
           sections: sections.map((s) => ({ ...s, count: p.links.filter((l) => l.section === s.key).length })),
           pages: p.pages,
           videos: p.videos.map((v) => ({ id: v.id, name: v.name, version: v.version, status: v.status })),

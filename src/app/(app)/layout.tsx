@@ -8,7 +8,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar user={{ name: user.name, color: user.color, role: user.role, email: user.email }} unread={unread} />
-      <main className="min-w-0 flex-1 overflow-hidden">{children}</main>
+      <main className="eh-canvas min-w-0 flex-1 overflow-hidden">{children}</main>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, Moon, Sun, FolderKanban, Archive, Building2, LayoutTemplate, Users, Columns3, LogOut, KeyRound } from "lucide-react";
+import { Bell, BrainCircuit, Moon, Sun, FolderKanban, Archive, Building2, LayoutTemplate, Users, Columns3, LogOut, KeyRound } from "lucide-react";
 import { logout } from "@/lib/actions";
 import { cn, ROLE_LABEL } from "@/lib/utils";
 import { Avatar, Menu, MenuItem } from "./ui";
@@ -42,6 +42,7 @@ export function Sidebar({
 
   const manager = user.role === "ADMIN" || user.role === "ACCOUNT_MANAGER";
   const nav = [
+    { href: "/pulse", label: "Pulse", icon: BrainCircuit },
     { href: "/notifications", label: "Notifications", icon: Bell, badge: unread },
     { href: "/projects", label: "Projects", icon: FolderKanban, exact: true },
     { href: "/projects/archived", label: "Archived", icon: Archive },
@@ -66,6 +67,7 @@ export function Sidebar({
           <Link
             key={n.href}
             href={n.href}
+            prefetch
             className={cn(
               "relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-zinc-400 transition-colors hover:bg-hover hover:text-zinc-100",
               isActive(n.href, n.exact) && "nav-active",

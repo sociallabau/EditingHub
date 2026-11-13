@@ -14,6 +14,7 @@ import { VideoUpload } from "@/components/project/VideoUpload";
 import { ProjectChat } from "@/components/project/ProjectChat";
 import { AddSection } from "@/components/project/AddSection";
 import { AiBrief } from "@/components/project/AiBrief";
+import { Thumbnails } from "@/components/project/Thumbnails";
 import { Avatar } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -84,6 +85,19 @@ export default async function ProjectPage({
       <div className="mx-auto max-w-3xl px-6 py-8">
         <div className="mb-1 text-xs text-muted">{p.title}</div>
         <PageEditor key={page.id} page={{ id: page.id, title: page.title, content: page.content, updatedAt: page.updatedAt.toISOString() }} />
+      </div>
+    );
+  } else if (tab === "thumbnails") {
+    const thumbs = p.links.filter((l) => l.section === "thumbnails").reverse();
+    main = (
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        <div className="mb-1 text-xs text-muted">{p.title}</div>
+        <Thumbnails
+          projectId={p.id}
+          coverUrl={p.coverUrl}
+          frameUrl={p.videos[0]?.thumbnailUrl ?? null}
+          items={thumbs.map((l) => ({ id: l.id, url: l.url, label: l.label, addedBy: l.addedBy.name }))}
+        />
       </div>
     );
   } else if (tab === "ai-brief") {

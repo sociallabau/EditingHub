@@ -13,6 +13,7 @@ export type BoardProject = {
   client: { id: string; name: string; color: string } | null;
   members: { id: string; name: string; color: string }[];
   thumb: string | null;
+  stageChangedAt: string;
   videos: number;
   openComments: number;
 };
@@ -25,6 +26,7 @@ export async function getBoardProjects(archived: boolean): Promise<BoardProject[
       client: { select: { id: true, name: true, color: true } },
       members: { include: { user: { select: { id: true, name: true, color: true } } }, orderBy: { addedAt: "asc" } },
       videos: { orderBy: { createdAt: "desc" }, take: 1, select: { thumbnailUrl: true } },
+      links: { where: { section: "thumbnails" }, orderBy: { createdAt: "desc" }, take: 1, select: { url: true } },
       _count: { select: { videos: true, comments: { where: { resolved: false, videoId: { not: null } } } } },
     },
   });
@@ -39,7 +41,8 @@ export async function getBoardProjects(archived: boolean): Promise<BoardProject[
     position: p.position,
     client: p.client,
     members: p.members.map((m) => m.user),
-    thumb: p.videos[0]?.thumbnailUrl ?? null,
+    thumb: p.coverUrl ?? p.links[0]?.url ?? p.videos[0]?.thumbnailUrl ?? null,
+    stageChangedAt: p.updatedAt.toISOString(),
     videos: p._count.videos,
     openComments: p._count.comments,
   }));
