@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+enum Role {
+  ADMIN
+  ACCOUNT_MANAGER
+  EDITOR
+  VIDEOGRAPHER
+}
+
+enum Priority {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Special behaviour for a board column. Uploading an edit moves a project to REVIEW,
+// "request changes" moves it to REVISIONS, "approve" moves it to APPROVED.
+enum StageKind {
+  NORMAL
+  REVIEW
+  REVISIONS
+  APPROVED
+}
+
+enum VideoStatus {
+  PENDING
+  CHANGES_REQUESTED
+  APPROVED
+}
+
+enum LinkKind {
+  DRIVE_FOLDER
+  DRIVE_FILE
+  UPLOAD
+  URL
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(EDITOR)
+  color        String   @default("#6366f1")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  memberships   ProjectMember[]
+  comments      Comment[]
+  activities    Activity[]
+  notifications Notification[] @relation("recipient")
+  sentNotifs    Notification[] @relation("actor")
+  videos        Video[]
+  links         Link[]
+  projects      Project[]       @relation("creator")
+}
+
+model Client {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  color     String    @default("#f2542d")
+  notes     String    @default("")
+  createdAt DateTime  @default(now())
+  projects  Project[]
+  links     Link[]
+}
+
+model Stage {
+  id       String    @id @default(cuid())
+  name     String
+  color    String
+  order    Int
+  kind     StageKind @default(NORMAL)
+  projects Project[]
+}
+
+model Template {
+  id              String    @id @default(cuid())
+  name            String
+  description     String    @default("")
+  color           String    @default("#22c55e")
+  defaultPriority Priority  @default(MEDIUM)
+  /// [{ key, title, hint }] — footage / asset sections (e.g. "Suburb B-roll")
+  sections        Json      @default("[]")
+  /// [{ title, content }] — pages created with every project (brief, shot list...)
+  pages           Json      @default("[]")
+  createdAt       DateTime  @default(now())
+  projects        Project[]
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  title       String
+  description String    @default("")
+  priority    Priority  @default(NONE)
+  dueDate     DateTime?
+  shootDate   DateTime?
+  position    Float     @default(0)
+  archived    Boolean   @default(false)
+  archivedAt  DateTime?
+  /// copied from the template when created; [{ key, title, hint }]
+  sections    Json      @default("[]")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  stageId     String
+  stage       Stage     @relation(fields: [stageId], references: [id])
+  clientId    String?
+  client      Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  templateId  String?
+  template    Template? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  createdById String
+  createdBy   User      @relation("creator", fields: [createdById], references: [id])
+
+  members       ProjectMember[]
+  pages         Page[]
+  videos        Video[]
+  links         Link[]
+  comments      Comment[]
+  activities    Activity[]
+  notifications Notification[]
+
+  @@index([archived, stageId])
+}
+
+model ProjectMember {
+  projectId String
+  userId    String
+  addedAt   DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @default("")
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Link {
+  id         String   @id @default(cuid())
+  section    String   @default("raw")
+  label      String
+  url        String
+  kind       LinkKind @default(URL)
+  size       Int?
+  createdAt  DateTime @default(now())
+  projectId  String?
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clientId   String?
+  client     Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  addedById  String
+  addedBy    User     @relation(fields: [addedById], references: [id])
+}
+
+model Video {
+  id           String      @id @default(cuid())
+  name         String
+  url          String
+  thumbnailUrl String?
+  size         Int?
+  contentType  String?
+  duration     Float?
+  version      Int         @default(1)
+  status       VideoStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+  projectId    String
+  project      Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploadedById String
+  uploadedBy   User        @relation(fields: [uploadedById], references: [id])
+  comments     Comment[]
+  notifications Notification[]
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  body      String
+  timestamp Float?
+  resolved  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  videoId   String?
+  video     Video?    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment?  @relation("thread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("thread")
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  message   String
+  createdAt DateTime @default(now())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  actorId   String
+  actor     User     @relation(fields: [actorId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation("recipient", fields: [userId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actor     User?    @relation("actor", fields: [actorId], references: [id], onDelete: SetNull)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  videoId   String?
+  video     Video?   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
