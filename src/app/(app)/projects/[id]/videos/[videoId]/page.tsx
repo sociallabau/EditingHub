@@ -40,6 +40,7 @@ export default async function VideoPage({ params }: { params: Promise<{ id: stri
         duration: video.duration,
         uploadedBy: video.uploadedBy.name,
         createdAt: video.createdAt.toISOString(),
+        thumbnailUrl: video.thumbnailUrl,
       }}
       transcript={(video.transcript?.segments as never) ?? null}
       aiQa={(video.aiQa as never) ?? null}

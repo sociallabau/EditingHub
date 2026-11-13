@@ -22,11 +22,13 @@ import {
   Check,
   Upload,
   Pencil,
+  Image as ImageIcon,
   Undo2,
   Columns2,
   X,
 } from "lucide-react";
-import { addComment, deleteComment, resolveComment, setVideoDuration, setVideoStatus } from "@/lib/actions";
+import { addComment, deleteComment, resolveComment, setVideoDuration, setVideoStatus, setVideoThumbnail } from "@/lib/actions";
+import { captureFrame, isDarkImage, uploadFile } from "@/lib/upload-client";
 import { cn, fmtTime } from "@/lib/utils";
 import { Avatar, Menu, MenuItem } from "../ui";
 import { CommentText, MentionInput, type MentionInputHandle, type MentionUser } from "../MentionInput";
@@ -76,6 +78,7 @@ export function VideoReview({
     duration: number | null;
     uploadedBy: string;
     createdAt: string;
+    thumbnailUrl: string | null;
   };
   comments: ReviewComment[];
   transcript: Segment[] | null;
@@ -223,6 +226,40 @@ export function VideoReview({
     setDrawMode((d) => !d);
   };
 
+  // Preview frame for the board card: grab the current frame on demand…
+  const [thumbState, setThumbState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  const makeThumb = useCallback(
+    async (at?: number) => {
+      const { thumb } = await captureFrame(video.url, at);
+      if (!thumb) throw new Error("no frame");
+      const up = await uploadFile(thumb, `projects/${project.id}/thumbs/${video.id}-${Date.now()}.jpg`);
+      await setVideoThumbnail(video.id, up.url);
+    },
+    [video.url, video.id, project.id],
+  );
+  const useFrame = async () => {
+    setThumbState("busy");
+    try {
+      await makeThumb(ref.current?.currentTime ?? 0);
+      setThumbState("done");
+    } catch {
+      setThumbState("error");
+    }
+    setTimeout(() => setThumbState("idle"), 2500);
+  };
+  // …and repair missing or black previews automatically the first time the edit is opened.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const bad = !video.thumbnailUrl || (await isDarkImage(video.thumbnailUrl));
+      if (bad && !cancelled) makeThumb().catch(() => {});
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video.id]);
+
   const pct = (t: number) => (duration ? (t / duration) * 100 : 0);
   const canReview = me.role === "ADMIN" || me.role === "ACCOUNT_MANAGER" || me.role === "EDITOR";
 
@@ -264,6 +301,10 @@ export function VideoReview({
         <Link href={`/projects/${project.id}?tab=videos`} className="btn" title="Upload a new version">
           <Upload className="h-3.5 w-3.5" /> New version
         </Link>
+        <button className="btn" onClick={useFrame} disabled={thumbState === "busy"} title="Use the frame you're paused on as the board preview">
+          <ImageIcon className="h-3.5 w-3.5" />
+          {thumbState === "busy" ? "Saving…" : thumbState === "done" ? "Preview set" : thumbState === "error" ? "Couldn't grab frame" : "Set preview"}
+        </button>
         <a href={video.url} download={video.name} target="_blank" rel="noreferrer" className="btn" title="Download">
           <Download className="h-3.5 w-3.5" />
         </a>

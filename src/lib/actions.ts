@@ -453,6 +453,14 @@ export async function setVideoStatus(videoId: string, status: VideoStatus) {
   refresh();
 }
 
+export async function setVideoThumbnail(videoId: string, thumbnailUrl: string) {
+  await requireUser();
+  const old = await db.video.findUniqueOrThrow({ where: { id: videoId }, select: { thumbnailUrl: true } });
+  await db.video.update({ where: { id: videoId }, data: { thumbnailUrl } });
+  if (old.thumbnailUrl !== thumbnailUrl) await removeBlob(old.thumbnailUrl);
+  refresh();
+}
+
 export async function setVideoDuration(videoId: string, duration: number) {
   await requireUser();
   await db.video.update({ where: { id: videoId }, data: { duration } });
