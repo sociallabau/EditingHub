@@ -54,12 +54,12 @@ export function Sidebar({
     exact ? path === href || (path.startsWith("/projects/") && !path.startsWith("/projects/archived")) : path.startsWith(href);
 
   return (
-    <aside className="scheme-dark flex w-[52px] shrink-0 flex-col bg-panel md:w-[208px]">
+    <aside className="eh-sidebar scheme-dark m-2 mr-0 flex w-[52px] shrink-0 flex-col rounded-2xl border border-line md:w-[208px]">
       <div className="flex items-center gap-2.5 px-3.5 py-4">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-accent shadow-[0_0_18px_var(--eh-glow)]">
           <svg viewBox="0 0 32 32" className="h-4 w-4"><path d="M12 9l11 7-11 7z" fill="#fff" /></svg>
         </div>
-        <span className="hidden font-heading text-[17px] font-medium tracking-tight md:inline">Editing Hub</span>
+        <span className="hidden text-[15px] font-semibold tracking-tight md:inline">Editing Hub</span>
       </div>
       <nav className="flex-1 space-y-0.5 px-2">
         {nav.map((n) => (
@@ -68,7 +68,7 @@ export function Sidebar({
             href={n.href}
             className={cn(
               "relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-zinc-400 transition-colors hover:bg-hover hover:text-zinc-100",
-              isActive(n.href, n.exact) && "bg-hover text-zinc-100",
+              isActive(n.href, n.exact) && "nav-active",
             )}
           >
             <n.icon className="h-4 w-4 shrink-0" />

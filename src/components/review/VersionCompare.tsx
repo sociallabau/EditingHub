@@ -182,7 +182,7 @@ export function VersionCompare({
             {pane(older, a, "a")}
             {pane(newer, b, "b")}
           </div>
-          <div className="border-t border-line bg-panel px-4 pb-3 pt-3">
+          <div className="border-t border-line bg-solid px-4 pb-3 pt-3">
             <div
               className="group relative h-5 cursor-pointer"
               onClick={(e) => {

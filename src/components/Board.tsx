@@ -281,7 +281,7 @@ export function Board({ projects, meta, me }: { projects: BoardProject[]; meta: 
       </div>
 
       {selecting && (
-        <div className="mx-4 mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-line bg-card px-3 py-2 text-xs">
+        <div className="mx-4 mb-2 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-card px-3 py-2 text-xs">
           <span className="font-medium">{selected.size} selected</span>
           <button className="btn-ghost" onClick={() => setSelected(new Set(Object.values(cols).flat()))}>
             Select all ({total})
@@ -386,7 +386,7 @@ export function Board({ projects, meta, me }: { projects: BoardProject[]; meta: 
         </div>
         <DragOverlay>
           {active ? (
-            <div className="w-[264px] rotate-2 opacity-95 shadow-2xl">
+            <div className="w-[264px] rotate-2 rounded-2xl bg-solid shadow-2xl">
               <CardBody project={active} />
             </div>
           ) : null}
@@ -463,7 +463,7 @@ function Column({
       <div
         ref={setNodeRef}
         className={cn(
-          "flex min-h-[120px] flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-transparent bg-panel/70 p-2",
+          "flex min-h-[120px] flex-1 flex-col gap-2 overflow-y-auto rounded-2xl border border-line/60 bg-panel p-2",
           isOver && "border-line bg-panel",
         )}
       >
@@ -506,7 +506,7 @@ function CardBody({ project: p }: { project: BoardProject }) {
   return (
     <div
       className={cn(
-        "group lux-card p-2.5 text-left hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_8px_20px_var(--eh-shadow)]",
+        "group lux-card p-2.5 text-left hover:-translate-y-0.5",
         p.priority === "URGENT" && "border-l-2 border-l-red-500",
       )}
     >

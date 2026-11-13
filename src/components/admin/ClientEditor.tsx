@@ -32,7 +32,7 @@ export function ClientEditor({ client, canManage }: { client: { id: string; name
           disabled={!canManage}
           onChange={(e) => setName(e.target.value)}
           onBlur={() => name.trim() && name !== client.name && save({ name })}
-          className="flex-1 bg-transparent font-heading text-[28px] font-medium tracking-tight outline-none"
+          className="flex-1 bg-transparent text-[26px] font-semibold tracking-tight outline-none"
         />
         {saved && <span className="text-xs text-green-500">Saved</span>}
         {canManage && (

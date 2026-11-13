@@ -7,11 +7,11 @@ import { LinkProvider } from "@astryxdesign/core/Link";
 import { chocolateTheme } from "@astryxdesign/theme-chocolate/built";
 
 type Mode = "light" | "dark";
-const ModeContext = createContext<{ mode: Mode; setMode: (m: Mode) => void }>({ mode: "light", setMode: () => {} });
+const ModeContext = createContext<{ mode: Mode; setMode: (m: Mode) => void }>({ mode: "dark", setMode: () => {} });
 export const useColorMode = () => useContext(ModeContext);
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [mode, setModeState] = useState<Mode>("light");
+  const [mode, setModeState] = useState<Mode>("dark");
   useEffect(() => {
     try {
       const saved = localStorage.getItem("eh-mode");

@@ -14,30 +14,37 @@
  * html[data-theme], or locally with .scheme-dark (sidebar, video player).
  */
 [data-astryx-theme="chocolate"] {
-  --color-background-body: light-dark(#ebe9df, #1d1412);
-  --color-background-surface: light-dark(#f3f1e9, #2c1f1c);
-  --color-background-card: light-dark(#fbfaf6, #372823);
-  --color-background-popover: light-dark(#fdfcf9, #3a2a25);
-  --color-background-muted: light-dark(#e0dccd, #46342d);
+  --color-background-body: light-dark(#ebe9df, #0f0a08);
+  --color-background-surface: light-dark(#f3f1e9, #1c1411);
+  --color-background-card: light-dark(#fbfaf6, #231915);
+  --color-background-popover: light-dark(#fdfcf9, #261b17);
+  --color-background-muted: light-dark(#e0dccd, #3a2a23);
   --color-background-inverted: light-dark(#2c1f1c, #ebe9df);
-  --color-text-primary: light-dark(#2c1f1c, #ebe9df);
+  --color-text-primary: light-dark(#2c1f1c, #f2efe6);
   --color-text-secondary: light-dark(#704e32, #baa788);
-  --color-text-disabled: light-dark(#977c58, #977c58);
-  --color-text-accent: light-dark(#704e32, #d9c7a6);
-  --color-accent: light-dark(#704e32, #baa788);
+  --color-text-disabled: light-dark(#977c58, #8d7557);
+  --color-text-accent: light-dark(#704e32, #e0cba6);
+  --color-accent: light-dark(#704e32, #c9b28c);
   --color-accent-muted: light-dark(#704e3222, #baa78826);
-  --color-on-accent: light-dark(#f6f4ec, #2c1f1c);
-  --color-border: light-dark(#d5ccb8, #ebe9df1c);
-  --color-border-emphasized: light-dark(#baa788, #704e32);
-  --color-track: light-dark(#d5ccb8, #4d3a32);
-  --eh-faint: light-dark(#a8926f, #8a7256);
-  --eh-shadow: light-dark(#2c1f1c1a, #00000066);
+  --color-on-accent: light-dark(#f6f4ec, #1c1310);
+  --color-border: light-dark(#d5ccb8, #ebe9df17);
+  --color-border-emphasized: light-dark(#baa788, #baa78866);
+  --color-track: light-dark(#d5ccb8, #4a382f);
+  --font-family-heading: var(--font-family-body);
+  --eh-faint: light-dark(#a8926f, #7d6850);
+  --eh-shadow: light-dark(#2c1f1c1a, #00000080);
+  /* glass surfaces: translucent warm tint over the glowing backdrop */
+  --eh-glass: light-dark(#f3f1e9, #ffe9d00b);
+  --eh-glass-2: light-dark(#fbfaf6, #ffe9d012);
+  --eh-glow: light-dark(#704e3233, #c9b28c55);
+  --eh-hi: light-dark(#ffffffb0, #ffffff0d);
 }
 
 @theme inline {
   --color-bg: var(--color-background-body);
-  --color-panel: var(--color-background-surface);
-  --color-card: var(--color-background-card);
+  --color-panel: var(--eh-glass);
+  --color-card: var(--eh-glass-2);
+  --color-solid: var(--color-background-surface);
   --color-pop: var(--color-background-popover);
   --color-hover: var(--color-background-muted);
   --color-line: var(--color-border);
@@ -89,6 +96,28 @@ body {
   font-size: 13px;
   -webkit-font-smoothing: antialiased;
 }
+/* ambient glow backdrop */
+[data-astryx-theme="chocolate"] {
+  background:
+    radial-gradient(1100px 620px at 8% -12%, light-dark(#baa78855, #c9b28c47), transparent 62%),
+    radial-gradient(900px 700px at 104% 108%, light-dark(#977c5833, #8a5f3a80), transparent 60%),
+    radial-gradient(600px 400px at 60% 40%, light-dark(#ffffff40, #977c581f), transparent 70%),
+    var(--color-background-body);
+  background-attachment: fixed;
+}
+.eh-sidebar {
+  background: var(--eh-glass);
+  backdrop-filter: blur(18px);
+  box-shadow: inset 0 1px 0 var(--eh-hi), 0 20px 50px -20px var(--eh-shadow);
+}
+html[data-theme="light"] .eh-sidebar {
+  background: linear-gradient(180deg, #33241f, #241815);
+}
+.nav-active {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 26%, transparent), transparent 85%);
+  box-shadow: inset 2px 0 0 var(--color-accent), 0 0 24px -8px var(--eh-glow);
+  color: var(--color-text-primary);
+}
 .scheme-dark {
   color-scheme: dark;
   color: var(--color-text-primary);
@@ -112,30 +141,39 @@ button:disabled {
 
 @layer components {
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-line bg-card px-3 py-1.5 text-xs font-medium text-ink shadow-[0_1px_0_var(--eh-shadow)] transition-all duration-150 hover:border-line-strong hover:bg-pop active:translate-y-px disabled:opacity-50;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-1.5 text-xs font-medium text-ink shadow-[inset_0_1px_0_var(--eh-hi)] transition-all duration-150 hover:border-line-strong hover:bg-hover active:scale-[0.98] disabled:opacity-50;
   }
   .btn-primary {
-    @apply inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-on-accent shadow-[0_1px_2px_var(--eh-shadow)] transition-all duration-150 hover:brightness-110 active:translate-y-px disabled:opacity-50;
+    @apply inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-on-accent transition-all duration-150 hover:brightness-110 active:scale-[0.98] disabled:opacity-50;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 100%, white 0%), color-mix(in srgb, var(--color-accent) 72%, #704e32));
+    box-shadow: inset 0 1px 0 #ffffff40, 0 6px 22px -6px var(--eh-glow);
   }
   .btn-ghost {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-muted transition-colors duration-150 hover:bg-hover hover:text-ink disabled:opacity-50;
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs text-muted transition-colors duration-150 hover:bg-hover hover:text-ink disabled:opacity-50;
   }
   .input {
-    @apply w-full rounded-lg border border-line bg-pop px-3 py-1.5 text-[13px] text-ink outline-none transition-colors placeholder:text-zinc-600 focus:border-accent focus:ring-2 focus:ring-accent/15;
+    @apply w-full rounded-xl border border-line bg-card px-3 py-1.5 text-[13px] text-ink outline-none transition-all placeholder:text-zinc-600 focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-muted)];
+  }
+  select.input option {
+    background: var(--color-background-popover);
+    color: var(--color-text-primary);
   }
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-line bg-card px-2.5 py-1 text-xs font-medium text-ink;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-2.5 py-1 text-xs font-medium text-ink shadow-[inset_0_1px_0_var(--eh-hi)];
   }
   .label {
     @apply mb-1 block text-[11px] font-semibold uppercase tracking-wider text-muted;
   }
   .panel {
-    @apply rounded-xl border border-line bg-panel;
+    @apply rounded-2xl border border-line bg-panel shadow-[inset_0_1px_0_var(--eh-hi)];
   }
   .page-title {
-    @apply font-heading text-[19px] font-medium tracking-tight text-ink;
+    @apply text-[18px] font-semibold tracking-tight text-ink;
   }
   .lux-card {
-    @apply rounded-xl border border-line bg-card shadow-[0_1px_2px_var(--eh-shadow)] transition-all duration-200;
+    @apply rounded-2xl border border-line bg-card shadow-[inset_0_1px_0_var(--eh-hi),0_8px_24px_-14px_var(--eh-shadow)] transition-all duration-200;
+  }
+  .lux-card:hover {
+    box-shadow: inset 0 1px 0 var(--eh-hi), 0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent), 0 14px 36px -14px var(--eh-glow);
   }
 }

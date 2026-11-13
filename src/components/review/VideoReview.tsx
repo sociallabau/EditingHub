@@ -321,7 +321,7 @@ export function VideoReview({
             <DrawLayer videoRef={ref} strokes={shownStrokes} drawing={drawMode} color={penColor} onChange={setDraft} />
             {drawMode && (
               <div
-                className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-2 rounded-full border border-line bg-panel/95 px-3 py-1.5 text-xs shadow-xl"
+                className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-2 rounded-full border border-line bg-pop/95 px-3 py-1.5 text-xs shadow-xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <span className="text-muted">Draw on the frame</span>
@@ -355,7 +355,7 @@ export function VideoReview({
           </div>
 
           {/* timeline with comment markers */}
-          <div className="border-t border-line bg-panel px-4 pb-2 pt-3">
+          <div className="border-t border-line bg-solid px-4 pb-2 pt-3">
             <div
               className="group relative h-6 cursor-pointer"
               onClick={(e) => {

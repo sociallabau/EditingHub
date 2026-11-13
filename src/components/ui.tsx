@@ -135,7 +135,7 @@ export function Menu({
             ref={panel}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="fixed z-50 max-h-[320px] overflow-auto rounded-xl border border-line bg-pop p-1 shadow-[0_12px_32px_var(--eh-shadow)]"
+            className="fixed z-50 max-h-[320px] overflow-auto rounded-2xl border border-line bg-pop/90 p-1.5 shadow-[0_18px_48px_var(--eh-shadow)] backdrop-blur-xl"
             style={{ top: pos.top, left: pos.left, width }}
           >
             {children(() => setOpen(false))}
@@ -165,7 +165,7 @@ export function MenuItem({
         onClick?.();
       }}
       className={cn(
-        "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-hover",
+        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs hover:bg-hover",
         danger ? "text-red-400" : "text-zinc-200",
         active && "bg-hover",
       )}

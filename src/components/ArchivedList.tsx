@@ -75,7 +75,7 @@ export function ArchivedList({
       </div>
       <div className="flex-1 overflow-auto px-4 pb-6">
         <table className="w-full min-w-[760px] text-left text-[13px]">
-          <thead className="sticky top-0 bg-bg text-[11px] uppercase tracking-wide text-muted">
+          <thead className="sticky top-0 bg-solid text-[11px] uppercase tracking-wide text-muted">
             <tr className="border-b border-line">
               <th className="w-8 py-2">
                 <button onClick={() => setSelected(all ? new Set() : new Set(rows.map((r) => r.id)))}>
